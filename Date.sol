@@ -1,183 +1,51 @@
 pragma solidity ^0.4.23;
 
 
-contract Date {
-    uint public secs;
-    string public dateString;
-    uint public year;
-    uint public month;
-    uint public day;
-    uint public hour;
-    uint public minute;
-    uint public second;
-    
-    constructor(uint _secondsSinceEpoch) public {
-        secs = _secondsSinceEpoch;
-        second = secs % 60;
-        minute = (secs / 60) % 60;
-        hour = (secs / 60 / 60) % 24;
+contract DateAndTime {
 
-        uint daysSinceEpoch = secs / 60 / 60 / 24;
-        uint _days = daysSinceEpoch;
-        uint _year = 1970;
-
-        while (_days >= 366) {
-          if(isLeapYear(_year)) {
-            _days = _days - 366;
-          } else {
-            _days = _days - 365;
-          }
-          _year = _year + 1;
-        }
-
-        year = _year;
-        
-        if(!isLeapYear(_year)){
-          if(_days < 31) {
-            month = 1;
-            day =_days +1;
-            return;
-          }
-          if(_days < 59) {
-            month = 2;
-            day =_days - 30;
-            return;
-          }
-          if(_days < 90) {
-            month = 3;
-            day =_days - 58;
-            return;
-          }
-          if(_days < 120) {
-            month = 4;
-            day =_days - 89;
-            return;
-          }
-          if(_days < 151) {
-            month = 5;
-            day =_days - 119;
-            return;
-          }
-          if(_days < 181) {
-            month = 6;
-            day =_days - 150;
-            return;
-          }
-          if(_days < 212) {
-            month = 7;
-            day =_days - 180;
-            return;
-          }
-          if(_days < 243) {
-            month = 8;
-            day =_days - 211;
-            return;
-          }
-          if(_days < 273) {
-            month = 9;
-            day =_days - 242;
-            return;
-          }
-          if(_days < 304) {
-            month = 10;
-            day =_days - 272;
-            return;
-          }
-          if(_days < 334) {
-            month = 11;
-            day =_days - 303;
-            return;
-          }
-          if(_days < 365) {
-            month = 12;
-            day =_days - 333;
-            return;
-          }
-        }
-
-        if(_days < 31) {
-            month = 1;
-            day =_days +1;
-            return;
-          }
-          if(_days < 60) {
-            month = 2;
-            day =_days - 30;
-            return;
-          }
-          if(_days < 91) {
-            month = 3;
-            day =_days - 59;
-            return;
-          }
-          if(_days < 121) {
-            month = 4;
-            day =_days - 90;
-            return;
-          }
-          if(_days < 152) {
-            month = 5;
-            day =_days - 120;
-            return;
-          }
-          if(_days < 182) {
-            month = 6;
-            day =_days - 151;
-            return;
-          }
-          if(_days < 213) {
-            month = 7;
-            day =_days - 181;
-            return;
-          }
-          if(_days < 244) {
-            month = 8;
-            day =_days - 212;
-            return;
-          }
-          if(_days < 274) {
-            month = 9;
-            day =_days - 243;
-            return;
-          }
-          if(_days < 305) {
-            month = 10;
-            day =_days - 273;
-            return;
-          }
-          if(_days < 335) {
-            month = 11;
-            day =_days - 304;
-            return;
-          }
-          if(_days < 366) {
-            month = 12;
-            day =_days - 334;
-            return;
-          }
+    struct DateTime {
+      uint timestamp;
+      uint16 year;
+      uint8 month;
+      uint8 day;
+      uint8 hour;
+      uint8 minute;
+      uint8 second;
     }
 
-    function isLeapYear(uint year) pure returns (bool) {
+    function getDateTimeFromTimestamp(uint _timestamp) public pure returns (int year, uint8 month, uint8 day, uint8 hour, uint8 minute, uint8 second){
+        second = uint8(_timestamp % 60);
+        minute = uint8(_timestamp / 60 % 60);
+        hour = uint8(_timestamp / 3600 % 24);
+
+      uint daysSinceEpoch = _timestamp / 86400;
+      daysSinceEpoch += 719468;
+      int8 era = int8((daysSinceEpoch >= 0 ? daysSinceEpoch : daysSinceEpoch - 146096) / 146097);
+      uint24 dayOfEra = uint24(int(daysSinceEpoch) - (int(era) * 146097));          // [0, 146096]
+      uint16 yearOfEra = uint16(dayOfEra - dayOfEra/1460 + dayOfEra/36524 - dayOfEra/146096) / 365;  // [0, 399]
+      year = int(int8(yearOfEra) + int(era) * 400);
+      uint16 dayOfYear = uint16(dayOfEra - (365*yearOfEra + yearOfEra/4 - yearOfEra/100));                // [0, 365]
+      uint8 auxiliaryMonth = uint8((5*dayOfYear + 2)/153);                                   // [0, 11]
+      day = uint8(dayOfYear - uint16((153*uint16(auxiliaryMonth)+2)/5) + 1);                             // [1, 31]
+      month = uint8(int8(auxiliaryMonth) + ((int8(auxiliaryMonth) < 10 ? int8(3) : -9)));                            // [1, 12]
+      year = year + (month <= 2 ? 1 : 0);
+    } 
+
+    function getSeconds(uint _timestamp) pure public returns (uint8) {
+      return uint8(_timestamp % 60);
+    }
+
+    function getMinute(uint _timestamp) pure public returns (uint8) {
+      return uint8(_timestamp / 60) % 60;
+    }
+
+    function getHour(uint _timestamp) pure public returns (uint8) {
+      return uint8(_timestamp / 60 / 60) % 24;
+    }
+
+    function isLeapYear(uint year) internal pure returns (bool) {
       return year % 400 == 0 || (year % 4 == 0 && year % 100 != 0);
     }
-    
-    function weeksSinceEpoch() view returns (uint) {
-        return secs / 604800;
-    }
-    
-    function daysSinceEpoch() view returns (uint) {
-        return secs / 86400;
-    }
-    
-    function hoursSinceEpoch() view returns (uint) {
-        return secs / 3600;
-    }
 
-    function minutesSinceEpoch() view returns (uint) {
-        return secs / 60;
-    }
-
-    function secondsSinceEpoch() view returns (uint) {
-        return secs;
-    }
+   
 }
