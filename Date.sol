@@ -35,7 +35,6 @@ contract DateAndTime {
         return dfe * 86400 + 3600 * hour + 60 * minute + second;
 
     }
-    
 
     function getDateTimeObjectFromTimestamp(int _timestamp) internal pure returns(DateTime dt)
     {
@@ -64,28 +63,28 @@ contract DateAndTime {
     }
 
     function getTimeFromTimestamp(int _timestamp) public pure returns(
-        uint8 hour,
-        uint8 minute,
-        uint8 second
+        int hour,
+        int minute,
+        int second
     )
     {
         if(_timestamp>0){
-            second = uint8(_timestamp % 60);
-            minute = uint8((_timestamp / 60 % 60));
-            hour = uint8(_timestamp / 3600 % 24);
+            second = _timestamp % 60;
+            minute = (_timestamp / 60 % 60);
+            hour = _timestamp / 3600 % 24;
 
         } else {
             int nh = _timestamp % 86400;
-            second = uint8((86400 + nh) % 60);
-            minute = uint8((86400 + nh) / 60 % 60);
-            hour = uint8((86400 + nh) / 3600 % 24);
+            second = (86400 + nh) % 60;
+            minute = (86400 + nh) / 60 % 60;
+            hour = (86400 + nh) / 3600 % 24;
         }
     }
 
     function getDateFromTimestamp(int _timestamp) public pure returns(
         int year,
-        uint8 month,
-        uint8 day
+        int month,
+        int day
     )
     {
         int dse = (_timestamp < 0 ? (_timestamp / 86400 - 1) : _timestamp / 86400);
@@ -95,30 +94,30 @@ contract DateAndTime {
         int yoe = (doe - doe/1460 + doe/36524 - doe/146096) / 365;
         int doy = doe - (365*yoe + yoe/4 - yoe/100);
         int mh = (5*doy + 2)/153;
-        day = uint8(doy - (153*mh+2)/5 + 1);
-        month = uint8((mh < 10 ? (mh + 3) : (mh -9)));
+        day = doy - (153*mh+2)/5 + 1;
+        month = (mh < 10 ? (mh + 3) : (mh -9));
         year = yoe + era * 400 + (month <= 2 ? 1 : 0);
     }
     
-    function getDateTimeFromTimestamp(int _timestamp) public pure returns(
+    function getDateTimeFromTimestamp(int _timestamp) public pure returns (
         int year,
-        uint8 month,
-        uint8 day,
-        uint8 hour,
-        uint8 minute,
-        uint8 second
+        int month,
+        int day,
+        int hour,
+        int minute,
+        int second
     )
     {
         if(_timestamp>0){
-            second = uint8(_timestamp % 60);
-            minute = uint8((_timestamp / 60 % 60));
-            hour = uint8(_timestamp / 3600 % 24);
+            second = _timestamp % 60;
+            minute = _timestamp / 60 % 60;
+            hour = _timestamp / 3600 % 24;
 
         } else {
             int nh = _timestamp % 86400;
-            second = uint8((86400 + nh) % 60);
-            minute = uint8((86400 + nh) / 60 % 60);
-            hour = uint8((86400 + nh) / 3600 % 24);
+            second = (86400 + nh) % 60;
+            minute = (86400 + nh) / 60 % 60;
+            hour = (86400 + nh) / 3600 % 24;
         }
 
         int dse = (_timestamp < 0 ? (_timestamp / 86400 - 1) : _timestamp / 86400);
@@ -128,8 +127,8 @@ contract DateAndTime {
         int yoe = (doe - doe/1460 + doe/36524 - doe/146096) / 365;
         int doy = doe - (365*yoe + yoe/4 - yoe/100);
         int mh = (5*doy + 2)/153;
-        day = uint8(doy - (153*mh+2)/5 + 1);
-        month = uint8((mh < 10 ? (mh + 3) : (mh -9)));
+        day = doy - (153*mh+2)/5 + 1;
+        month = (mh < 10 ? (mh + 3) : (mh -9));
         year = yoe + era * 400 + (month <= 2 ? 1 : 0);
     } 
 
